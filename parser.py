@@ -27,5 +27,8 @@ with open("import/time_planner_logged_activities_2021.html", encoding="utf8") as
             if len(cells) == 3:
                 time = cells[0].find(text=True)
                 date = cells[1].find(text=True)
+                # convert date to proper format, ex: 3 авг. 2021 г. => '2020-08-03T00:00:00+03:00'
+                # date_start =
+                # date_end =
                 name = cells[2].find(text=True)
                 print("{0}\t{1}\t{2}".format(time, date, name))
