@@ -5,7 +5,7 @@
 
 import re
 from bs4 import BeautifulSoup
-from common.functions import convert_tp_date, convert_tp_time
+from common.functions import convert_tp_date, convert_tp_time, roundTime
 
 with open("import/time_planner_logged_activities_2021-06-30.html", encoding="utf8") as f:
 

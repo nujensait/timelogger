@@ -1,0 +1,24 @@
+# Test time rounding
+# @source https://stackoverflow.com/questions/3463930/how-to-round-the-minute-of-a-datetime-object/10854034#10854034
+#!/usr/bin/env python3
+
+from datetime import datetime
+from common.functions import roundTime
+
+dt = datetime.fromisoformat("2021-06-30 09:19:03")
+print(dt)
+print(roundTime(dt, roundTo = 5))
+print()
+# 2021-06-30 09:20:00
+
+dt = datetime.fromisoformat("2021-06-30 09:12:03")
+print(dt)
+print(roundTime(dt, roundTo = 5))
+print()
+# 2021-06-30 09:10:00
+
+dt = datetime.fromisoformat("2021-06-30 09:04:00")
+print(dt)
+print(roundTime(dt))
+print()
+#

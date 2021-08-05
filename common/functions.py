@@ -2,7 +2,7 @@
 
 import locale       # for russian locale usage
 import re           # regexp
-from datetime import datetime
+import datetime
 
 def convert_tp_time(time_str):
     replaced = re.sub('[^\d\:]', '', time_str)
@@ -45,7 +45,7 @@ def convert_tp_date(date_str):
     dat = ""
     for date_fmt in date_formats:
         try:
-            date_time = datetime.strptime(date_str, date_fmt)
+            date_time = datetime.datetime.strptime(date_str, date_fmt)
             dt = "%s %s" % (date_time.date() , date_time.time())
         except ValueError:
             pass
@@ -55,3 +55,12 @@ def convert_tp_date(date_str):
         dt = ""
         # print('failed to parse %r' % date_str)
     return str(dt)
+
+# Round dateTime
+# @source https://stackoverflow.com/questions/3463930/how-to-round-the-minute-of-a-datetime-object/10854034#10854034
+def roundTime(dt = None, roundTo = 10):
+   dt += datetime.timedelta(minutes = roundTo)
+   dt -= datetime.timedelta(minutes = dt.minute % (roundTo * 2),
+                            seconds = dt.second,
+                            microseconds = dt.microsecond)
+   return dt
