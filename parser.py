@@ -5,7 +5,7 @@
 
 from bs4 import BeautifulSoup
 
-with open("import/time_planner_logged_activities_2021.html", encoding="utf8") as f:
+with open("import/time_planner_logged_activities_2021-06-30.html", encoding="utf8") as f:
     contents = f.read()
 
     soup = BeautifulSoup(contents, 'lxml')
