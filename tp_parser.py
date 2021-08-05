@@ -3,11 +3,16 @@
 # @source https://python-scripts.com/beautifulsoup-html-parsing
 #!/usr/bin/python3
 
+import re
 from bs4 import BeautifulSoup
+from common.functions import convert_tp_date, convert_tp_time
 
 with open("import/time_planner_logged_activities_2021-06-30.html", encoding="utf8") as f:
+
+    # read file
     contents = f.read()
 
+    # load as DOM
     soup = BeautifulSoup(contents, 'lxml')
 
     cats = []
@@ -15,20 +20,25 @@ with open("import/time_planner_logged_activities_2021-06-30.html", encoding="utf
         #print("{0}".format(cat.text))
         cats.append(cat.text)
 
-    # revert values for proper pop
-    #cats = cats.sort()
-
     tables = soup.findAll("table", {"cellpadding": "10"})
     for table in tables:
         cat = cats.pop(0)
-        print(cat)
+        #print(cat)
         for row in table.findAll("tr"):
             cells = row.findAll("td")
             if len(cells) == 3:
                 time = cells[0].find(text=True)
                 date = cells[1].find(text=True)
                 # convert date to proper format, ex: 3 авг. 2021 г. => '2020-08-03T00:00:00+03:00'
-                # date_start =
-                # date_end =
-                name = cells[2].find(text=True)
-                print("{0}\t{1}\t{2}".format(time, date, name))
+                times = time.split('- ')
+                time1 = convert_tp_time(times[0])
+                time2 = convert_tp_time(times[1])
+                # make classic dateTimes, like: '2021-06-30 17:42:00'
+                date_start = convert_tp_date("%s %s" % (date, time1))
+                date_end = convert_tp_date("%s %s" % (date, time2))
+                # action name can be empty...
+                name = str(cells[2].find(text=True) or '')
+                # add category name to action name:
+                name = "%s / %s" % (cat , name) if name != "" else cat
+                print("{0}\t{1}\t{2}".format(date_start, date_end, name))
+                #exit(1)
