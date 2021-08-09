@@ -7,38 +7,25 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import re
 from bs4 import BeautifulSoup
+import sys
+
+import config
 from common.functions import convert_tp_date, convert_tp_time, roundTime
-
-SCOPES = ['https://www.googleapis.com/auth/calendar']
-
-calendarId = 'mishaikon@gmail.com'; #'lp285psodk309lilp73d9irek8@group.calendar.google.com'
-SERVICE_ACCOUNT_FILE = 'timeplanner-321909-44d96c49fe5d.json'
+from pprint import pprint
+from clickhouse_driver.client import Client
+import sqlite3
 
 ########################################################################################################################
 
 class TimeLogger(object):
 
     def __init__(self):
-        credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+        credentials = service_account.Credentials.from_service_account_file(config.SERVICE_ACCOUNT_FILE, scopes=config.SCOPES)
         self.service = googleapiclient.discovery.build('calendar', 'v3', credentials=credentials)
 
-    # создание словаря с информацией о событии
-    def create_events_dict_deprecated(self):
-        events = [{
-            'summary': 'test event',
-            'description': 'some info',
-            'start': {
-                'dateTime': '2020-08-03T03:00:00+03:00',
-            },
-            'end': {
-                'dateTime': '2020-08-03T05:30:00+03:00',
-            }
-        }]
-        return events
-
     # Read events from html, store it to dict
-    def create_events_dict(self, file):
-        events = self.parse_html(file)
+    def create_events_dict(self, conn, file):
+        events = self.parse_html(conn, file)
         # make events dict
         dict = []
         for event in events:
@@ -67,12 +54,11 @@ class TimeLogger(object):
 
     # создание события в календаре
     def create_event(self, event):
-        e = self.service.events().insert(calendarId=calendarId,
-                                         body=event).execute()
+        e = self.service.events().insert(calendarId=config.CALENDAR_ID, body=event).execute()
         print('Event created: %s' % (e.get('id')))
 
     # Parse html file: exctract actions data
-    def parse_html(self, file_name):
+    def parse_html(self, conn, file_name):
 
         with open(file_name, encoding="utf8") as f:
 
@@ -103,28 +89,80 @@ class TimeLogger(object):
                         # make classic dateTimes, like: '2021-06-30 17:42:00'
                         date_start = convert_tp_date("%s %s" % (date, time1))
                         date_end   = convert_tp_date("%s %s" % (date, time2))
-                        # round times
-                        #date_start = roundTime(date_start, 10)
-                        #date_end   = roundTime(date_end, 10)
                         # action name can be empty...
                         name       = str(cells[2].find(text=True) or '')
                         # add category name to action name:
                         name       = "%s / %s" % (cat , name) if name != "" else cat
                         #print("{0}\t{1}\t{2}".format(date_start, date_end, name))
-                        events.append({
-                            "date_start": date_start,
-                            "date_end": date_end,
-                            "name": name
-                        })
+                        # create event if not exists
+                        exist      = self.event_exist(conn, date_start, date_end)
+                        if(not exist):
+                            events.append({
+                                "date_start": date_start,
+                                "date_end": date_end,
+                                "name": name
+                            })
+                            self.save_event(conn, date_start, date_end, name)
             return events
+
+    # create logger
+    def create_logger_table(self, conn):
+        cursor = conn.cursor()
+        print("[ CREATE TABLE 'events' ... ]\n")
+        cursor.execute("""CREATE TABLE events
+                          (user_id     		    text, 
+                           name    		        text,
+                           date_start           text,
+                           date_end             text,
+                           time_start           timestamp, 
+                           time_end             timestamp,
+                           time_import          timestamp
+                           )
+                        """)
+        conn.commit()
+        print("[ CREATE DONE ]\n")
+
+    # check that event exists
+    def event_exist(self, conn, date_start, date_end):
+        cursor = conn.cursor()
+        clickhouse_query = """
+            SELECT count(*) as exist
+            FROM events 
+            WHERE date_start = '%s'             
+              AND date_end   = '%s'
+            """ % ( date_start, date_end)
+        result = cursor.execute(clickhouse_query)
+        records = cursor.fetchall()
+        return (1 if records[0][0] > 0 else 0)
+
+    # save event to DB
+    def save_event(self, conn, date_start, date_end, name):
+        cursor = conn.cursor()
+        time_start  = datetime.datetime.fromisoformat(date_start).timestamp()
+        time_end    = datetime.datetime.fromisoformat(date_end).timestamp()
+        time_import = datetime.datetime.now().timestamp()
+        cursor.execute("INSERT INTO events VALUES ('%s', '%s', '%s', '%s', %d, %d, %d)" % (config.USER_ID, name, date_start, date_end, time_start, time_end, time_import))
 
 
 ########################################################################################################################
 
+print("[ START ]")
+
 logger = TimeLogger()
 
+conn = sqlite3.connect(config.sqlite3_db_path)
+cursor = conn.cursor()
+
+if '--action=create_table' in sys.argv:
+    logger.create_logger_table(conn)
+    exit(1)
+
 # parse events
-events = logger.create_events_dict("import/time_planner_logged_activities_2021-06-30.html")
+events = logger.create_events_dict(conn, config.IMPORT_FILE)
 
 # save events to calendar
 logger.create_events(events)
+
+# finish
+print("[ FINISH ]")
+conn.close()
