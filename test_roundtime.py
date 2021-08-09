@@ -17,8 +17,11 @@ print(roundTime(dt, roundTo = 5))
 print()
 # 2021-06-30 09:10:00
 
-dt = datetime.fromisoformat("2021-06-30 09:04:00")
+dt = datetime.fromisoformat("2021-06-30 09:08:00")
 print(dt)
 print(roundTime(dt))
 print()
-#
+# 2021-06-30 09:00:00
+
+print(roundTime(datetime(2012,12,31,23,44,49), 30))
+# 2012-12-31 23:30:00

@@ -42,10 +42,10 @@ def convert_tp_date(date_str):
     for r in months_mapping:
         date_str = date_str.replace(*r)
 
-    dat = ""
     for date_fmt in date_formats:
         try:
             date_time = datetime.datetime.strptime(date_str, date_fmt)
+            date_time = roundTime(date_time, 10)        # round to closest :10 min
             dt = "%s %s" % (date_time.date() , date_time.time())
         except ValueError:
             pass
@@ -56,11 +56,17 @@ def convert_tp_date(date_str):
         # print('failed to parse %r' % date_str)
     return str(dt)
 
-# Round dateTime
-# @source https://stackoverflow.com/questions/3463930/how-to-round-the-minute-of-a-datetime-object/10854034#10854034
+"""Round a datetime object to a multiple of a timedelta
+@source https://visdap.blogspot.com/2019/02/how-to-round-minute-of-datetime-object.html
+dt : datetime.datetime object, default now.
+dateDelta : timedelta object, we round to a multiple of this, default 1 minute.
+Author: Thierry Husson 2012 - Use it as you want but don't blame me.
+        Stijn Nevens 2014 - Changed to use only datetime objects as variables
+"""
 def roundTime(dt = None, roundTo = 10):
-   dt += datetime.timedelta(minutes = roundTo)
-   dt -= datetime.timedelta(minutes = dt.minute % (roundTo * 2),
-                            seconds = dt.second,
-                            microseconds = dt.microsecond)
-   return dt
+    dateDelta = datetime.timedelta(minutes=roundTo)
+    roundTo = dateDelta.total_seconds()
+    if dt == None : dt = datetime.datetime.now()
+    seconds = (dt - dt.min).seconds
+    rounding = (seconds + roundTo / 2) // roundTo * roundTo
+    return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
