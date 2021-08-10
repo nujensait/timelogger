@@ -1,0 +1,31 @@
+/* Css styles used in TimeLogger web pages */
+
+body {
+    font-family: sans-serif;
+}
+
+h2 {
+    width: 300px;
+    text-align: center;
+}
+
+.uploadForm {
+    border: 1px solid rgba(157, 147, 146, 0.75);
+    background-color: beige;
+    width: 300px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.btn {
+    text-align: center;
+    border-radius: 3px;
+    border: 1px solid rgba(157, 147, 146, 0.75);
+    height: 30px;
+    width: 80px;
+}
+
+.center_div {
+    text-align: center;
+}

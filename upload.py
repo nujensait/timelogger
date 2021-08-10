@@ -1,6 +1,7 @@
 #!C:\Users\ikonnikov\AppData\Local\Programs\Python\Python36-32\python.exe
 # Upload file to server
 # @source https://www.tutorialspoint.com/file-upload-example-in-python
+# @see also: big files uploading: http://cgi.tutorial.codepoint.net/big-file-upload
 
 import cgi, os
 import cgitb; cgitb.enable()
@@ -21,10 +22,10 @@ def upload_file(form):
        # If you run the above script on Unix/Linux, then you need to take care of replacing file separator as follows, otherwise on your windows machine above open() statement should work fine.
        #fn = os.path.basename(fileitem.filename.replace("\\", "/"))
        open('./files/' + fn, 'wb').write(fileitem.file.read())
-       message = 'The file "' + fn + '" was uploaded successfully'
+       message = 'Файл "' + fn + '" успешно загружен.'
        res = 1
     else:
-       message = 'No file was uploaded'
+       message = 'Ошибка загрузки файла'
        res = 0
 
     # uploading result message
@@ -38,16 +39,24 @@ def upload_file(form):
 def show_upload_form():
     print("""\
     <html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
     <body>
-        <h2>TimeLogger</h2>
-        <form action="upload.py" method="post" enctype="multipart/form-data">
-            <p><label>File type:</label> 
+        <h2>Time Logger</h2>
+        <form action="upload.py" method="post" enctype="multipart/form-data" class="uploadForm">
+            <div class="center_div">
+                <p><h4>Импорт событий</h4></p>
+            </div>
+            <p><label>Тип:</label> 
             <select name="filetype">
                 <option value="timeplanner">Time Planner (html)</option>
             </select></p>
-            <p><label>File:</label> 
+            <p><label>Файл:</label> 
             <input type="file" name="filename" value=""/></p>
-           <p><input type="submit" value="Upload" /></p>
+            <div class="center_div">
+                <p><input type="submit" value="Загрузить" class="btn"/></p>
+            </div>
         </form>
     </body>
     </html>
