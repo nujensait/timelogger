@@ -6,43 +6,8 @@ import cgi, os
 import cgitb; cgitb.enable()
 import sys
 
-def show_upload_form():
-    print("""
-    <html>
-    <body>
-        <form action="upload.py" method="post" enctype="multipart/form-data">
-            <p><label>File type:</label> 
-            <select name="filetype">
-                <option value="timeplanner">Time Planner (html)</option>
-            </select></p>
-            <p><label>File:</label> 
-            <input type="file" name="filename" value=""/></p>
-           <p><input type="submit" value="Upload" /></p>
-        </form>
-    </body>
-    </html>
-    """)
-
-########################################################################################################################
-
-print("Content-type: text/html\n")
-print("<h2>TimeLogger</h2>")
-
-# Windows needs stdio set for binary mode.
-# @see http://cgi.tutorial.codepoint.net/file-upload
-try:
-    import msvcrt
-    msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
-    msvcrt.setmode (1, os.O_BINARY) # stdout = 1
-except ImportError:
-    pass
-
-sys.path.insert(0, os.getcwd())
-
-form = cgi.FieldStorage()
-
-if "filename" in form:
-
+# upload file from form
+def upload_file(form):
     fileitem = form['filename']
     filename = fileitem.filename
 
@@ -59,12 +24,47 @@ if "filename" in form:
 
     # uploading result message
     print("""\
-    Content-Type: text/html\n
+        <p><i>%s</i></p>
+    """ % (message))
+
+# show file uploading form
+def show_upload_form():
+    print("""\
     <html>
     <body>
-       <p>%s</p>
+        <h2>TimeLogger</h2>
+        <form action="upload.py" method="post" enctype="multipart/form-data">
+            <p><label>File type:</label> 
+            <select name="filetype">
+                <option value="timeplanner">Time Planner (html)</option>
+            </select></p>
+            <p><label>File:</label> 
+            <input type="file" name="filename" value=""/></p>
+           <p><input type="submit" value="Upload" /></p>
+        </form>
     </body>
     </html>
-    """ % (message))
+    """)
+
+########################################################################################################################
+
+print("Content-type: text/html\n")
+
+# Windows needs stdio set for binary mode.
+# @see http://cgi.tutorial.codepoint.net/file-upload
+try:
+    import msvcrt
+    msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
+    msvcrt.setmode (1, os.O_BINARY) # stdout = 1
+except ImportError:
+    pass
+
+sys.path.insert(0, os.getcwd())
+
+form = cgi.FieldStorage()
+
+if "filename" in form:
+    show_upload_form()
+    upload_file(form)
 else:
     show_upload_form()
