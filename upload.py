@@ -5,6 +5,9 @@
 import cgi, os
 import cgitb; cgitb.enable()
 import sys
+from logger import TimeLogger
+import sqlite3
+import config
 
 # upload file from form
 def upload_file(form):
@@ -19,13 +22,17 @@ def upload_file(form):
        #fn = os.path.basename(fileitem.filename.replace("\\", "/"))
        open('./files/' + fn, 'wb').write(fileitem.file.read())
        message = 'The file "' + fn + '" was uploaded successfully'
+       res = 1
     else:
        message = 'No file was uploaded'
+       res = 0
 
     # uploading result message
     print("""\
         <p><i>%s</i></p>
     """ % (message))
+
+    return ('./files/' + fn) if res else ""
 
 # show file uploading form
 def show_upload_form():
@@ -46,6 +53,20 @@ def show_upload_form():
     </html>
     """)
 
+# import data from uploaded file
+def import_file(file):
+
+    logger = TimeLogger()
+
+    conn = sqlite3.connect(config.sqlite3_db_path)
+    cursor = conn.cursor()
+
+    # parse events
+    events = logger.create_events_dict(conn, file)
+
+    # save events to calendar
+    logger.create_events(events)
+
 ########################################################################################################################
 
 print("Content-type: text/html\n")
@@ -65,6 +86,7 @@ form = cgi.FieldStorage()
 
 if "filename" in form:
     show_upload_form()
-    upload_file(form)
+    file = upload_file(form)
+    import_file(file)
 else:
     show_upload_form()
