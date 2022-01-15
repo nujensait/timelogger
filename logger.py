@@ -5,9 +5,7 @@ import datetime
 import googleapiclient
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import re
 from bs4 import BeautifulSoup
-import sys
 
 import config
 from common.functions import convert_tp_date, convert_tp_time, roundTime
@@ -146,23 +144,3 @@ class TimeLogger(object):
 
 ########################################################################################################################
 
-print("[ START ]")
-
-logger = TimeLogger()
-
-conn = sqlite3.connect(config.sqlite3_db_path)
-cursor = conn.cursor()
-
-if '--action=create_table' in sys.argv:
-    logger.create_logger_table(conn)
-    exit(1)
-
-# parse events
-events = logger.create_events_dict(conn, config.IMPORT_FILE)
-
-# save events to calendar
-logger.create_events(events)
-
-# finish
-print("[ FINISH ]")
-conn.close()
