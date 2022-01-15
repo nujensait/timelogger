@@ -1,0 +1,35 @@
+<html>
+<body>
+
+<style>
+#outer {
+    display: block;
+    border-radius: 5px;
+    border: 1px solid #000;
+    background-color: #CCC;
+    width: 400px;
+    padding: 10px;
+    font-family: Verdana;
+    font-size:  10pt;
+}
+</style>
+
+<div id="outer">
+    <form method="POST"  enctype="multipart/form-data" action="parser.py">
+
+        <label>File type: </label>
+        <select>
+            <option value="timeplanner">Time Planner log (android app)</option>
+        </select>
+        <br /><br />
+
+        <label>File: </label>
+        <input type="file" name="file" />
+        <br /><br />
+
+        <input type="submit" value="Upload file"/>
+    </form>
+</div>
+
+</body>
+</html>

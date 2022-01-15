@@ -7,6 +7,11 @@ import re
 from bs4 import BeautifulSoup
 from common.functions import convert_tp_date, convert_tp_time, roundTime
 
+# form file parsing
+import cgi
+import cgitb
+import os
+
 ########################################################################################################################
 
 # Parse html file
@@ -46,5 +51,18 @@ def parse_html(file_name):
                     print("{0}\t{1}\t{2}".format(date_start, date_end, name))
 
 ########################################################################################################################
+# Upload file
 
-parse_html("import/time_planner_logged_activities_2021-06-30.html")
+# @see https://stackoverflow.com/questions/25489397/how-to-upload-and-read-a-file
+def upload_file():
+    cgitb.enable()
+    form = cgi.FieldStorage()
+    if 'file' in form and form['file'].file:
+        print ('<p>Uploading file "%s:...</p>' % form['file'].filename);
+        # move uploaded file
+        new_filename = './import/' . form['file'].filename;
+        os.replace(form['file'].file, new_filename);
+        # parse uploaded file
+        #parse_html(new_filename)
+
+#parse_html("import/time_planner_logged_activities_2021-06-30.html")
