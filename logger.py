@@ -131,14 +131,15 @@ class TimeLogger(object):
             return events
 
     # create logger
-    def create_logger_table(self, conn):
+    def create_logger_tables(self, conn):
         cursor = conn.cursor()
         print("[ CREATE TABLE 'events' ... ]\n")
         cursor.execute("""CREATE TABLE events
-                          (user_id     		    text, 
+                          (user_id     		    text,
+                           category             text, 
                            name    		        text,
-                           date_start           text,
-                           date_end             text,
+                           date_start           datetime,
+                           date_end             datetime,
                            time_start           timestamp, 
                            time_end             timestamp,
                            time_import          timestamp
@@ -146,6 +147,14 @@ class TimeLogger(object):
                         """)
         conn.commit()
         print("[ CREATE DONE ]\n")
+
+    # create logger
+    def drop_logger_tables(self, conn):
+        cursor = conn.cursor()
+        print("[ DROP TABLE 'events' ... ]\n")
+        cursor.execute("""DROP TABLE events""")
+        conn.commit()
+        print("[ DROP DONE ]\n")
 
     # check that event exists
     def event_exist(self, conn, date_start, date_end):
@@ -167,8 +176,17 @@ class TimeLogger(object):
         time_end    = datetime.strptime(date_end, "%Y-%m-%d %H:%M:%S").timestamp()
         time_import = datetime.now().timestamp()
         # save to DB
-        cursor.execute("INSERT INTO events (user_id, name, date_start, date_end, time_start, time_end, time_import) " \
-                       "VALUES ('%s', '%s', '%s', '%s', %d, %d, %d)" %
-                       (config.USER_ID, name, date_start, date_end, time_start, time_end, time_import))
+        sql = "INSERT INTO events " \
+              "(user_id, name, date_start, date_end, time_start, time_end, time_import) " \
+              "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        result = cursor.execute(sql, [config.USER_ID, name, date_start, date_end, time_start, time_end, time_import])
+
+        # Save (commit) the changes
+        conn.commit()
+
+        #print(result)
+        #print(sql)
+        #print("<br >")
+        return result
 
 ########################################################################################################################

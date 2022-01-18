@@ -70,6 +70,7 @@ def show_upload_form():
 
 # import data from uploaded file
 def import_file(file):
+
     logger = TimeLogger()
 
     conn = sqlite3.connect(config.sqlite3_db_path)
@@ -85,7 +86,10 @@ def import_file(file):
     events_dict = logger.create_events_dict(events)
 
     # save events to calendar
-    logger.create_calendar_events(events_dict)
+    #logger.create_calendar_events(events_dict)
+
+    # close DB connection
+    conn.close()
 
 
 ########################################################################################################################
