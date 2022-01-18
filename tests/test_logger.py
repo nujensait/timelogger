@@ -26,7 +26,7 @@ if '--action=create_table' in sys.argv:
 events = logger.create_events_dict(conn, config.IMPORT_FILE)
 
 # save events to calendar
-logger.create_events(events)
+logger.create_calendar_events(events)
 
 # finish
 print("[ FINISH ]")

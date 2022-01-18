@@ -3,18 +3,16 @@
 # Unix: !/usr/bin/python3
 
 from __future__ import print_function
-from datetime import datetime, time, date
+from datetime import datetime
 import googleapiclient
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from bs4 import BeautifulSoup
 
 import config
-from common.functions import convert_tp_date, convert_tp_time, roundTime
+from common.functions import convert_tp_date, convert_tp_time
 from pprint import pprint
-from clickhouse_driver.client import Client
 import sqlite3
-
 
 ########################################################################################################################
 
@@ -25,10 +23,13 @@ class TimeLogger(object):
                                                                             scopes=config.SCOPES)
         self.service = googleapiclient.discovery.build('calendar', 'v3', credentials=credentials)
 
-    # Read events from html, store it to dict
-    def create_events_dict(self, conn, file):
+    # Read events from html
+    def parse_events_file(self, conn, file):
         events = self.parse_html(conn, file)
-        # make events dict
+        return events
+
+    # Store it to dict (suitable for export into Goggle calendar)
+    def create_events_dict(self, events):
         dict = []
         for event in events:
             dict.append({
@@ -45,12 +46,13 @@ class TimeLogger(object):
 
     # convert python date to google calendar date
     # '2020-08-03 03:00:00' ==> '2020-08-03T03:00:00+03:00'
-    def make_calendar_date(self, dt):
+    @staticmethod
+    def make_calendar_date(dt):
         dt = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
         return dt.strftime("%Y-%m-%dT%H:%M:%S+03:00")
 
     # create multiple events
-    def create_events(self, events):
+    def create_calendar_events(self, events):
         for event in events:
             self.create_event(event)
 
@@ -58,6 +60,20 @@ class TimeLogger(object):
     def create_event(self, event):
         e = self.service.events().insert(calendarId=config.CALENDAR_ID, body=event).execute()
         print("\nCalendar event created: %s <br />\n" % (e.get('id')))
+
+    # print events table
+    def print_events(self, events):
+        print("<h3>Импортируемые данные:</h3>")
+        print("<table cellpadding=5 cellspacing=0 border=1>")
+        print("<tr><th>Дата начала</th><th>Дата завершения</th><th>Событие</th></tr>")
+        # output parsed data
+        for event in events:
+            print("<tr>")
+            print("<td>" + event.get('date_start') + "</td>\n")
+            print("<td>" + event.get('date_end') + "</td>\n")
+            print("<td>" + event.get('name') + "</td>\n")
+            print("</tr>")
+        print("</table>")
 
     # Parse html file: exctract actions data
     def parse_html(self, conn, file_name):
@@ -75,10 +91,6 @@ class TimeLogger(object):
             cats = []
             for cat in soup.find_all("b"):
                 cats.append(cat.text)
-
-            print("<h3>Импортируемые данные:</h3>")
-            print("<table cellpadding=5 cellspacing=0 border=1>");
-            print("<tr><th>Дата начала</th><th>Дата завершения</th><th>Событие</th></tr>")
 
             tables = soup.findAll("table", {"cellpadding": "10"})
             for table in tables:
@@ -98,7 +110,7 @@ class TimeLogger(object):
                             date_end = convert_tp_date("%s %s" % (date, time2))
                         except Exception as e:
                             # print("Error: wrong event date/time: " + time);
-                            continue;
+                            continue
 
                         # action name can be empty...
                         name = str(cells[2].find(text=True) or '')
@@ -106,24 +118,15 @@ class TimeLogger(object):
                         name = "%s / %s" % (cat, name) if name != "" else cat
                         # print("{0}\t{1}\t{2}".format(date_start, date_end, name))
 
-                        # output parsed data
-                        print("<tr>");
-                        print("<td>" + date_start + "</td>\n");
-                        print("<td>" + date_end + "</td>\n");
-                        print("<td>" + name + "</td>\n");
-                        print("</tr>");
-
                         # create event if not exists
                         exist = self.event_exist(conn, date_start, date_end)
-                        if (not exist):
+                        if not exist:
                             events.append({
                                 "date_start": date_start,
                                 "date_end": date_end,
                                 "name": name
                             })
                             self.save_event(conn, date_start, date_end, name)
-
-            print("</table>");
 
             return events
 
@@ -147,24 +150,25 @@ class TimeLogger(object):
     # check that event exists
     def event_exist(self, conn, date_start, date_end):
         cursor = conn.cursor()
-        clickhouse_query = """
+        query = """
             SELECT count(*) as exist
             FROM events 
             WHERE date_start = '%s'             
               AND date_end   = '%s'
             """ % (date_start, date_end)
-        result = cursor.execute(clickhouse_query)
+        cursor.execute(query)
         records = cursor.fetchall()
-        return (1 if records[0][0] > 0 else 0)
+        return 1 if records[0][0] > 0 else 0
 
     # save event to DB
     def save_event(self, conn, date_start, date_end, name):
         cursor      = conn.cursor()  # db connection
-        time_start  = datetime.strptime(date_start, "%Y-%m-%d %H:%M:%S").timestamp();
-        time_end    = datetime.strptime(date_end, "%Y-%m-%d %H:%M:%S").timestamp();
-        time_import = datetime.now().timestamp();
+        time_start  = datetime.strptime(date_start, "%Y-%m-%d %H:%M:%S").timestamp()
+        time_end    = datetime.strptime(date_end, "%Y-%m-%d %H:%M:%S").timestamp()
+        time_import = datetime.now().timestamp()
         # save to DB
-        cursor.execute("INSERT INTO events VALUES ('%s', '%s', '%s', '%s', %d, %d, %d)" %
+        cursor.execute("INSERT INTO events (user_id, name, date_start, date_end, time_start, time_end, time_import) " \
+                       "VALUES ('%s', '%s', '%s', '%s', %d, %d, %d)" %
                        (config.USER_ID, name, date_start, date_end, time_start, time_end, time_import))
 
 ########################################################################################################################

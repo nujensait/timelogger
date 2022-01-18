@@ -15,8 +15,6 @@ import sys
 import config
 from logger import TimeLogger
 
-cgitb.enable()
-
 # upload file from form
 def upload_file(form):
     fileitem = form['filename']
@@ -70,7 +68,6 @@ def show_upload_form():
     </html>
     """)
 
-
 # import data from uploaded file
 def import_file(file):
     logger = TimeLogger()
@@ -78,14 +75,23 @@ def import_file(file):
     conn = sqlite3.connect(config.sqlite3_db_path)
     cursor = conn.cursor()
 
+    # parse events from file
+    events = logger.parse_events_file(conn, file)
+
+    # print imported events
+    logger.print_events(events)
+
     # parse events
-    events = logger.create_events_dict(conn, file)
+    events_dict = logger.create_events_dict(events)
 
     # save events to calendar
-    logger.create_events(events)
+    logger.create_calendar_events(events_dict)
 
 
 ########################################################################################################################
+
+# enable CGI
+cgitb.enable()
 
 # Windows needs stdio set for binary mode.
 # @see http://cgi.tutorial.codepoint.net/file-upload
