@@ -1,14 +1,21 @@
-#!C:\Users\ikonnikov\AppData\Local\Programs\Python\Python36-32\python.exe
+#!C:\Users\misha\AppData\Local\Programs\Python\Python310\python.exe
+# For WORK_PC: C:\Users\ikonnikov\AppData\Local\Programs\Python\Python36-32\python.exe
 # Upload file to server
 # @source https://www.tutorialspoint.com/file-upload-example-in-python
 # @see also: big files uploading: http://cgi.tutorial.codepoint.net/big-file-upload
 
-import cgi, os
-import cgitb; cgitb.enable()
-import sys
-from logger import TimeLogger
+print("Content-type: text/html\n");
+
+import cgi
+import cgitb
+import os
 import sqlite3
+import sys
+
 import config
+from logger import TimeLogger
+
+cgitb.enable()
 
 # upload file from form
 def upload_file(form):
@@ -17,16 +24,16 @@ def upload_file(form):
 
     # Test if the file was uploaded
     if filename:
-       # strip leading path from file name to avoid directory traversal attacks
-       fn = os.path.basename(filename)
-       # If you run the above script on Unix/Linux, then you need to take care of replacing file separator as follows, otherwise on your windows machine above open() statement should work fine.
-       #fn = os.path.basename(fileitem.filename.replace("\\", "/"))
-       open('./files/' + fn, 'wb').write(fileitem.file.read())
-       message = 'Файл "' + fn + '" успешно загружен.'
-       res = 1
+        # strip leading path from file name to avoid directory traversal attacks
+        fn = os.path.basename(filename)
+        # If you run the above script on Unix/Linux, then you need to take care of replacing file separator as follows, otherwise on your windows machine above open() statement should work fine.
+        # fn = os.path.basename(fileitem.filename.replace("\\", "/"))
+        open('./files/' + fn, 'wb').write(fileitem.file.read())
+        message = 'Файл "' + fn + '" успешно загружен.'
+        res = 1
     else:
-       message = 'Ошибка загрузки файла'
-       res = 0
+        message = 'Ошибка загрузки файла'
+        res = 0
 
     # uploading result message
     print("""\
@@ -34,6 +41,7 @@ def upload_file(form):
     """ % (message))
 
     return ('./files/' + fn) if res else ""
+
 
 # show file uploading form
 def show_upload_form():
@@ -62,9 +70,9 @@ def show_upload_form():
     </html>
     """)
 
+
 # import data from uploaded file
 def import_file(file):
-
     logger = TimeLogger()
 
     conn = sqlite3.connect(config.sqlite3_db_path)
@@ -76,16 +84,15 @@ def import_file(file):
     # save events to calendar
     logger.create_events(events)
 
-########################################################################################################################
 
-print("Content-type: text/html\n")
+########################################################################################################################
 
 # Windows needs stdio set for binary mode.
 # @see http://cgi.tutorial.codepoint.net/file-upload
 try:
     import msvcrt
-    msvcrt.setmode (0, os.O_BINARY) # stdin  = 0
-    msvcrt.setmode (1, os.O_BINARY) # stdout = 1
+    msvcrt.setmode(0, os.O_BINARY)  # stdin  = 0
+    msvcrt.setmode(1, os.O_BINARY)  # stdout = 1
 except ImportError:
     pass
 
