@@ -1,0 +1,8 @@
+﻿User;Email;Client;Project;Task;Description;Billable;Start date;Start time;End date;End time;Duration;Tags;Amount ()
+Mishaikon;mishaikon@gmail.com;;Блоггинг;;Разбор фоток;No;2021-08-03;21:35:41;2021-08-03;21:45:55;10:14 min;блоггинг;
+Mishaikon;mishaikon@gmail.com;;Блоггинг;;Разбор фоток;No;2021-08-03;21:47:07;2021-08-03;22:18:02;30:55 min;блоггинг;
+Mishaikon;mishaikon@gmail.com;;Развитие;;Поиск тайм трекера;No;2021-08-03;22:30:16;2021-08-03;22:30:20;00:04 min;тайм-менеджмент;
+Mishaikon;mishaikon@gmail.com;;Блоггинг;;Разбор фоток;No;2021-08-03;22:30:20;2021-08-03;22:30:28;00:08 min;блоггинг;
+Mishaikon;mishaikon@gmail.com;;Развитие;;Поиск тайм трекера;No;2021-08-03;22:30:28;2021-08-03;22:30:32;00:04 min;тайм-менеджмент;
+Mishaikon;mishaikon@gmail.com;;;;Скрипт для импорта Python <==> Google calendar;No;2021-08-04;11:57:05;2021-08-04;11:57:52;00:47 min;timeplanner;
+Mishaikon;mishaikon@gmail.com;;;;Скрипт для импорта Python <==> Google calendar;No;2021-08-04;12:49:33;2021-08-04;13:09:31;19:58 min;timeplanner;

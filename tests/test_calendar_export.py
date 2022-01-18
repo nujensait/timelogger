@@ -1,5 +1,10 @@
 # Sync: Python <==> Google calendar
 # @source https://habr.com/ru/post/525680/
+
+# read libs in parent dir
+import sys
+sys.path.insert(0, '..')
+
 from __future__ import print_function
 import datetime
 import googleapiclient

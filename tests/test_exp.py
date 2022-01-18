@@ -1,4 +1,9 @@
 # Experiments
+
+# read libs in parent dir
+import sys
+sys.path.insert(0, '..')
+
 import re
 
 # Sanitize time string: leave only digits & ':' symbol

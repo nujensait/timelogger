@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 # Export parsed html file date to Google calendar
 
+# read libs in parent dir
+import sys
+sys.path.insert(0, '..')
+
 from __future__ import print_function
 import sys
 from logger import TimeLogger

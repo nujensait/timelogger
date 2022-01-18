@@ -1,7 +1,9 @@
 # Export parsed html file date to Google calendar
+#!/usr/bin/python3
 
 from __future__ import print_function
-import datetime
+#import datetime
+from datetime import datetime, time, date
 import googleapiclient
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -42,7 +44,7 @@ class TimeLogger(object):
     # convert python date to google calendar date
     # '2020-08-03 03:00:00' ==> '2020-08-03T03:00:00+03:00'
     def make_calendar_date(self, dt):
-        dt = datetime.datetime.fromisoformat(dt)
+        dt = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
         return dt.strftime("%Y-%m-%dT%H:%M:%S+03:00")
 
     # create multiple events
@@ -53,7 +55,7 @@ class TimeLogger(object):
     # создание события в календаре
     def create_event(self, event):
         e = self.service.events().insert(calendarId=config.CALENDAR_ID, body=event).execute()
-        print('Event created: %s' % (e.get('id')))
+        print("\nCalendar event created: %s <br />\n" % (e.get('id')))
 
     # Parse html file: exctract actions data
     def parse_html(self, conn, file_name):
@@ -72,26 +74,43 @@ class TimeLogger(object):
             for cat in soup.find_all("b"):
                 cats.append(cat.text)
 
+            print("<h3>Импортируемые данные:</h3>")
+            print("<table cellpadding=5 cellspacing=0 border=1>");
+            print("<tr><th>Дата начала</th><th>Дата завершения</th><th>Событие</th></tr>")
+
             tables = soup.findAll("table", {"cellpadding": "10"})
             for table in tables:
                 cat = cats.pop(0)
                 for row in table.findAll("tr"):
                     cells = row.findAll("td")
                     if len(cells) == 3:
-                        time       = cells[0].find(text=True)
-                        date       = cells[1].find(text=True)
-                        # convert date to proper format, ex: 3 авг. 2021 г. => '2020-08-03T00:00:00+03:00'
-                        times      = time.split('- ')
-                        time1      = convert_tp_time(times[0])
-                        time2      = convert_tp_time(times[1])
-                        # make classic dateTimes, like: '2021-06-30 17:42:00'
-                        date_start = convert_tp_date("%s %s" % (date, time1))
-                        date_end   = convert_tp_date("%s %s" % (date, time2))
+                        try:
+                            time       = cells[0].find(text=True)
+                            date       = cells[1].find(text=True)
+                            # convert date to proper format, ex: 3 авг. 2021 г. => '2020-08-03T00:00:00+03:00'
+                            times      = time.split('- ')
+                            time1      = convert_tp_time(times[0])
+                            time2      = convert_tp_time(times[1])
+                            # make classic dateTimes, like: '2021-06-30 17:42:00'
+                            date_start = convert_tp_date("%s %s" % (date, time1))
+                            date_end   = convert_tp_date("%s %s" % (date, time2))
+                        except Exception as e:
+                            #print("Error: wrong event date/time: " + time);
+                            continue;
+
                         # action name can be empty...
                         name       = str(cells[2].find(text=True) or '')
                         # add category name to action name:
                         name       = "%s / %s" % (cat , name) if name != "" else cat
                         #print("{0}\t{1}\t{2}".format(date_start, date_end, name))
+
+                        # output parsed data
+                        print("<tr>");
+                        print("<td>" + date_start + "</td>\n");
+                        print("<td>" + date_end + "</td>\n");
+                        print("<td>" + name + "</td>\n");
+                        print("</tr>");
+
                         # create event if not exists
                         exist      = self.event_exist(conn, date_start, date_end)
                         if(not exist):
@@ -101,6 +120,9 @@ class TimeLogger(object):
                                 "name": name
                             })
                             self.save_event(conn, date_start, date_end, name)
+
+            print("</table>");
+
             return events
 
     # create logger
@@ -135,11 +157,13 @@ class TimeLogger(object):
 
     # save event to DB
     def save_event(self, conn, date_start, date_end, name):
-        cursor = conn.cursor()
-        time_start  = datetime.datetime.fromisoformat(date_start).timestamp()
-        time_end    = datetime.datetime.fromisoformat(date_end).timestamp()
-        time_import = datetime.datetime.now().timestamp()
-        cursor.execute("INSERT INTO events VALUES ('%s', '%s', '%s', '%s', %d, %d, %d)" % (config.USER_ID, name, date_start, date_end, time_start, time_end, time_import))
+        cursor      = conn.cursor()     # db connection
+        time_start  = datetime.strptime(date_start, "%Y-%m-%d %H:%M:%S").timestamp();
+        time_end    = datetime.strptime(date_end, "%Y-%m-%d %H:%M:%S").timestamp();
+        time_import = datetime.now().timestamp();
+        # save to DB
+        cursor.execute("INSERT INTO events VALUES ('%s', '%s', '%s', '%s', %d, %d, %d)" %
+                       (config.USER_ID, name, date_start, date_end, time_start, time_end, time_import))
 
 
 ########################################################################################################################
