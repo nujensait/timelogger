@@ -1,8 +1,16 @@
-# About TimeLogger 
+**[Russian version](./README.MD)**
+
+## Table of Contents
+- [About project](#about-project)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Contributing](#contributing)
+
+# About project
 
 TimeLogger is a script used to pare/save 
 timelog files exported from other applications
-(Toggl, TimeLoggoer, etc.)
+(Toggl, TimePlanner, Habitify,etc.)
 
 ## Setup
 
@@ -40,4 +48,7 @@ All events stored in file will be:
 ## Contributing
 Pull requests are welcome. 
 For major changes, please open an issue first to discuss what you would like to change.
-Write to me: [mishaikon@gmail.com](mailto:mishaikon@gmail.com)
+My contacts are below.
+
+## Author
+Ikonnikov Mikhail [mishaikon@gmail.com](mailto:mishaikon@gmail.com)
