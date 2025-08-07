@@ -1,5 +1,7 @@
 # Makefile для TimeLogger
-# Автор: Иконников Михаил
+# запускать в среде linux или wsl (в windows)
+# Пример запуска:
+# make setup
 
 .PHONY: help setup run
 
@@ -13,15 +15,15 @@ help:
 # Установка всех необходимых зависимостей
 setup:
 	pip install --upgrade pip
-	python -m pip install --upgrade pip
+	sudo python3 -m pip install --upgrade pip
 	pip install --upgrade google-api-python-client
 	pip install bs4
 	pip install wheel
 	pip install lxml
 
-# Запуск локального веб-сервера
+# Запуск локального веб-сервера с поддержкой CGI
 run:
-	@echo "Запуск локального HTTP веб-сервера на порту 8000..."
-	@echo "Откройте страницу загрузки файлов: http://localhost:8000/upload.py"
-	@echo "ИЛИ (если вы используете WAMP/OSPanel): http://timelogger/upload.py"
-	python -m http.server
+	@echo "Запуск локального HTTP веб-сервера с поддержкой CGI на порту 8000..."
+	@echo "Откройте страницу загрузки файлов: http://localhost:8000/cgi-bin/upload.py"
+	@echo "ИЛИ (если вы используете WAMP/OSPanel): http://timelogger/cgi-bin/upload.py"
+	python3 -m http.server --cgi 8000
