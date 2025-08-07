@@ -77,7 +77,7 @@ def import_file(file):
     cursor = conn.cursor()
 
     # parse events from file
-    events = logger.parse_events_file(conn, file)
+    events = logger.parse_html(conn, file)
 
     # print imported events
     logger.print_events(events)

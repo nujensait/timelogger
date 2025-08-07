@@ -27,7 +27,7 @@ if '--action=drop_tables' in sys.argv:
     exit(1)
 
 # parse events from file
-events = logger.parse_events_file(conn, config.IMPORT_FILE)
+events = logger.parse_html(conn, config.IMPORT_FILE)
 
 # parse events
 events_dict = logger.create_events_dict(events)

@@ -23,11 +23,6 @@ class TimeLogger(object):
                                                                             scopes=config.SCOPES)
         self.service = googleapiclient.discovery.build('calendar', 'v3', credentials=credentials)
 
-    # Read events from html
-    def parse_events_file(self, conn, file):
-        events = self.parse_html(conn, file)
-        return events
-
     # Store it to dict (suitable for export into Goggle calendar)
     def create_events_dict(self, events):
         dict = []
