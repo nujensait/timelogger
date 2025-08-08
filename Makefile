@@ -3,7 +3,7 @@
 # Пример запуска:
 # make setup
 
-.PHONY: help setup run
+.PHONY: help setup run setup-cgi test
 
 # Команда по умолчанию - выводит справку
 help:
@@ -21,9 +21,22 @@ setup:
 	pip install wheel
 	pip install lxml
 
+# Настройка прав доступа для CGI-скриптов
+setup-cgi:
+	@echo "Установка прав доступа для CGI-скриптов..."
+	chmod +x cgi-bin/*.py
+	ls -la cgi-bin/
+	@echo "Права доступа установлены. Теперь вы можете запустить сервер."
+
 # Запуск локального веб-сервера с поддержкой CGI
 run:
 	@echo "Запуск локального HTTP веб-сервера с поддержкой CGI на порту 8000..."
 	@echo "Откройте страницу загрузки файлов: http://localhost:8000/cgi-bin/upload.py"
 	@echo "ИЛИ (если вы используете WAMP/OSPanel): http://timelogger/cgi-bin/upload.py"
 	python3 -m http.server --cgi 8000
+
+# Запуск всех тестов из папки /tests
+test:
+	@echo "Запуск тестов..."
+	python3 -m pytest tests/ -v
+	@echo "Тесты завершены"

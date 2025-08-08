@@ -55,4 +55,5 @@ Thumbs.db
 importtimeplanner-*.json
 
 # configs
-config
+#config/config.py
+#config/timeplanner-321909-44d96c49fe5d.json

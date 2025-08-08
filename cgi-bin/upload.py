@@ -1,5 +1,4 @@
-#!C:\Users\misha\AppData\Local\Programs\Python\Python310\python.exe
-# For WORK_PC: C:\Users\ikonnikov\AppData\Local\Programs\Python\Python36-32\python.exe
+#!/usr/bin/env python3
 # Upload file to server
 # @source https://www.tutorialspoint.com/file-upload-example-in-python
 # @see also: big files uploading: http://cgi.tutorial.codepoint.net/big-file-upload
@@ -12,7 +11,7 @@ import os
 import sqlite3
 import sys
 
-import config
+from ..config import config
 from logger import TimeLogger
 
 # upload file from form
@@ -26,7 +25,7 @@ def upload_file(form):
         fn = os.path.basename(filename)
         # If you run the above script on Unix/Linux, then you need to take care of replacing file separator as follows, otherwise on your windows machine above open() statement should work fine.
         # fn = os.path.basename(fileitem.filename.replace("\\", "/"))
-        open('./files/' + fn, 'wb').write(fileitem.file.read())
+        open('../files/' + fn, 'wb').write(fileitem.file.read())
         message = 'Файл "' + fn + '" успешно загружен.'
         res = 1
     else:
@@ -38,7 +37,7 @@ def upload_file(form):
         <p><i>%s</i></p>
     """ % (message))
 
-    return ('./files/' + fn) if res else ""
+    return ('../files/' + fn) if res else ""
 
 
 # show file uploading form
@@ -46,11 +45,11 @@ def show_upload_form():
     print("""\
     <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="style.css">
+        <link rel="stylesheet" type="text/css" href="../assets/style.css">
     </head>
     <body>
         <h2>Time Logger</h2>
-        <form action="upload.py" method="post" enctype="multipart/form-data" class="uploadForm">
+        <form action="/cgi-bin/upload.py" method="post" enctype="multipart/form-data" class="uploadForm">
             <div class="center_div">
                 <p><h4>Импорт событий</h4></p>
             </div>

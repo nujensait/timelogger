@@ -29,3 +29,14 @@ h2 {
 .center_div {
     text-align: center;
 }
+
+#outer {
+    display: block;
+    border-radius: 5px;
+    border: 1px solid #000;
+    background-color: #CCC;
+    width: 400px;
+    padding: 10px;
+    font-family: Verdana;
+    font-size:  10pt;
+}

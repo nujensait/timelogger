@@ -1,6 +1,5 @@
-#!C:\Users\misha\AppData\Local\Programs\Python\Python310\python.exe
+#!/usr/bin/env python3
 # Export parsed html file date to Google calendar
-# Unix: !/usr/bin/python3
 
 from __future__ import print_function
 from datetime import datetime
@@ -9,8 +8,8 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from bs4 import BeautifulSoup
 
-import config
-from common.functions import convert_tp_date, convert_tp_time
+from ..config import config
+from ..common.functions import convert_tp_date, convert_tp_time
 from pprint import pprint
 import sqlite3
 
@@ -20,7 +19,7 @@ class TimeLogger(object):
 
     def __init__(self):
         credentials = service_account.Credentials.from_service_account_file(config.SERVICE_ACCOUNT_FILE,
-                                                                            scopes=config.SCOPES)
+                                                                            scopes=config.GOOGLE_CALENDAR_SCOPES)
         self.service = googleapiclient.discovery.build('calendar', 'v3', credentials=credentials)
 
     # Store it to dict (suitable for export into Goggle calendar)
@@ -53,7 +52,7 @@ class TimeLogger(object):
 
     # создание события в календаре
     def create_event(self, event):
-        e = self.service.events().insert(calendarId=config.CALENDAR_ID, body=event).execute()
+        e = self.service.events().insert(calendarId=config.GOOGLE_CALENDAR_ID, body=event).execute()
         print("\nCalendar event created: %s <br />\n" % (e.get('id')))
 
     # print events table
